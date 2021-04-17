@@ -14,8 +14,12 @@ provider:
       - .vscode/**
 
 functions:
+  job:
+    handler: src/job/handler.run
+    events:
+      - schedule: rate(1 minute)
   app:
-    handler: handler.run
+    handler: handler.api
     events:
       - http:
           path: /
