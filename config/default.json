@@ -1,0 +1,6 @@
+{
+    "CLIENT_ID": "subscriptions-billing",
+    "BROKERS": "localhost:9092",
+    "TOPIC": "recurrent-billing",
+    "AWS_REGION": "us-east-1"
+}
