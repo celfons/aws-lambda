@@ -1,0 +1,50 @@
+{
+  "name": "subscriptions-billing",
+  "version": "1.0.0",
+  "description": "NODE-API",
+  "main": "index.js",
+  "scripts": {
+    "start": "export NODE_ENV=dev && serverless offline start --skipCacheInvalidation",
+    "test": "jest --passWithNoTests --silent --noStackTrace --runInBand",
+    "test:full": "jest --passWithNoTests --runInBand",
+    "test:unit": "npm test -- --watch -c jest-unit-config.js",
+    "test:integration": "npm test -- --watch -c jest-integration-config.js",
+    "test:staged": "npm test -- --findRelatedTests",
+    "test:ci": "npm test -- --coverage"
+  },
+  "keywords": [],
+  "author": "Marcel",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/config": "^0.0.38",
+    "@types/express": "^4.17.11",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.0.1",
+    "@types/uuid": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "config": "^3.3.6",
+    "eslint": "^7.25.0",
+    "eslint-config-standard-with-typescript": "^20.0.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1",
+    "git-commit-msg-linter": "^3.1.0",
+    "husky": "^4.3.0",
+    "jest": "^26.6.3",
+    "lint-staged": "^10.5.4",
+    "serverless-dynamodb-local": "^0.2.39",
+    "serverless-offline": "^6.9.0",
+    "serverless-plugin-typescript": "^1.1.9",
+    "sucrase": "^3.18.1",
+    "ts-jest": "^26.5.5",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "dynamoose": "^2.7.3",
+    "express": "^4.17.1",
+    "kafkajs": "^1.15.0",
+    "nodemon": "^2.0.7",
+    "serverless-http": "^2.7.0"
+  }
+}

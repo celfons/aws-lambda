@@ -1,0 +1,42 @@
+service: express-serverless-app
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: v1
+  region: us-east-1
+  timeout: 30
+  memorySize: 512
+  package:
+    excludeDevDependencies: true
+    exclude:
+      - node_modules/**
+      - .git/**
+      - .vscode/**
+  layers:
+  nodeModules:
+    path: layer
+    compatibleRuntimes:
+      - nodejs12.x
+      
+functions:
+  api:
+    handler: src/main/handler.api
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+  job:
+    handler: src/main/handler.run
+    events:
+      - schedule: rate(1 minute)
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-dynamodb-local
+  - serverless-offline
