@@ -4,7 +4,7 @@
   "description": "NODE-API",
   "main": "index.js",
   "scripts": {
-    "start": "export NODE_ENV=dev && serverless offline start --skipCacheInvalidation",
+    "start": "docker-compose up -d && serverless offline start --skipCacheInvalidation",
     "test": "jest --passWithNoTests --silent --noStackTrace --runInBand",
     "test:full": "jest --passWithNoTests --runInBand",
     "test:unit": "npm test -- --watch -c jest-unit-config.js",
