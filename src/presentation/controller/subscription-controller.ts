@@ -1,5 +1,5 @@
 import { HttpResponse, HttpRequest } from './helpers/http'
-import { badRequest, serverError, ok } from './helpers/ http-helper'
+import { badRequest, serverError, ok, notFound } from './helpers/ http-helper'
 import { ISubscription } from '../../domain/subscription'
 import { Controller } from './controller'
 import { verifyParam } from './helpers/validate-helper'
@@ -36,6 +36,9 @@ export class SubscriptionController implements Controller {
   async get (): Promise<HttpResponse> {
     try {
       const subscription = await this.service.get()
+      if (subscription.length === 0) {
+        return notFound(new MissingParamError('Subscriptions not found'))
+      }
       return ok(subscription)
     } catch (error) {
       return serverError()

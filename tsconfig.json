@@ -3,13 +3,20 @@
         "outDir": "./dist",
         "module": "commonjs",
         "target": "ES2020",
-        "rootDir": "./src",
+        "rootDirs": ["src", "tests"],
         "esModuleInterop": true,
         "moduleResolution": "node",
         "preserveConstEnums": true,
         "sourceMap": true,
         "allowJs": true,
         "lib": ["es2020"],
-        "strictNullChecks": true
-    }
+        "strictNullChecks": true,
+        "baseUrl": "src",
+        "paths": {
+            "@/tests/*": ["../tests/*"],
+            "@/*": ["*"]
+        }
+    },
+    "include": ["src", "tests"],
+    "exclude": []
 }
