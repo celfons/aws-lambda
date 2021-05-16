@@ -24,7 +24,8 @@ const makeAddSubscriptionRepository = (): ISubscriptionRepository => {
         startDate: '2021-05-02',
         duration: 30,
         period: 'DAYS',
-        dueDate: '2021-06-02'
+        dueDate: '2021-06-02',
+        active: true
       }
       return await new Promise(resolve => resolve(fakeSubscription))
     }
@@ -37,8 +38,23 @@ const makeAddSubscriptionRepository = (): ISubscriptionRepository => {
         startDate: '2021-05-02',
         duration: 30,
         period: 'DAYS',
-        dueDate: '2021-06-02'
+        dueDate: '2021-06-02',
+        active: true
       }]
+      return await new Promise(resolve => resolve(fakeSubscription))
+    }
+
+    async update (subscription: SubscriptionModel): Promise<SubscriptionModel> {
+      const fakeSubscription = {
+        id: '1',
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS',
+        dueDate: '2021-06-02',
+        active: false
+      }
       return await new Promise(resolve => resolve(fakeSubscription))
     }
 
@@ -50,7 +66,8 @@ const makeAddSubscriptionRepository = (): ISubscriptionRepository => {
         startDate: '2021-05-02',
         duration: 30,
         period: 'DAYS',
-        dueDate: '2021-06-02'
+        dueDate: '2021-06-02',
+        active: true
       }]
       return await new Promise(resolve => resolve(fakeSubscription))
     }
@@ -77,7 +94,8 @@ describe('DbAddSubscription Usecase ', () => {
       startDate: '2021-05-02',
       duration: 30,
       period: 'DAYS',
-      dueDate: '2021-06-02'
+      dueDate: '2021-06-02',
+      active: true
     })
   })
   test('Should call SubscriptionRepository to add subscription with period like month', async () => {
@@ -98,7 +116,8 @@ describe('DbAddSubscription Usecase ', () => {
       startDate: '2021-05-02',
       duration: 30,
       period: 'DAYS',
-      dueDate: '2021-06-02'
+      dueDate: '2021-06-02',
+      active: true
     })
   })
   test('Should call SubscriptionRepository to get subscriptions', async () => {
@@ -111,8 +130,33 @@ describe('DbAddSubscription Usecase ', () => {
       startDate: '2021-05-02',
       duration: 30,
       period: 'DAYS',
-      dueDate: '2021-06-02'
+      dueDate: '2021-06-02',
+      active: true
     }])
+  })
+  test('Should call SubscriptionRepository to update subscription', async () => {
+    const { sut } = makeSut()
+    const subscriptionData = {
+      id: '1',
+      customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+      offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+      startDate: '2021-05-02',
+      duration: 1,
+      period: 'MONTH',
+      dueDate: '2021-06-02',
+      active: false
+    }
+    const subscription = await sut.update(subscriptionData)
+    expect(subscription).toEqual({
+      id: '1',
+      customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+      offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+      startDate: '2021-05-02',
+      duration: 30,
+      period: 'DAYS',
+      dueDate: '2021-06-02',
+      active: false
+    })
   })
   test('Should call SubscriptionRepository to get subscriptions by due date', async () => {
     const { sut } = makeSut()
@@ -124,7 +168,8 @@ describe('DbAddSubscription Usecase ', () => {
       startDate: '2021-05-02',
       duration: 30,
       period: 'DAYS',
-      dueDate: '2021-06-02'
+      dueDate: '2021-06-02',
+      active: true
     }])
   })
 })

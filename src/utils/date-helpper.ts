@@ -9,5 +9,15 @@ export const DateHelpper = {
       return `0${day}`
     }
     return day.toString()
+  },
+  buildDueDate (date: string, duration: number, period: string): string {
+    const buildDate = new Date(date)
+    if (period === 'DAYS') {
+      const dueDate = buildDate.setDate(buildDate.getDate() + duration)
+      return this.format(new Date(dueDate))
+    } else {
+      const dueDate = buildDate.setMonth(buildDate.getMonth() + duration)
+      return this.format(new Date(dueDate))
+    }
   }
 }

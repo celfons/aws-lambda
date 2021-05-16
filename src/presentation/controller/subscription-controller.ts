@@ -46,4 +46,14 @@ export class SubscriptionController implements Controller {
       return serverError()
     }
   }
+
+  async update (httpRequest: HttpRequest): Promise<HttpResponse> {
+    try {
+      const { id, customerId, offerId, startDate, duration, period, dueDate, active } = httpRequest.body
+      const subscription = await this.service.update({ id, customerId, offerId, startDate, duration, period, dueDate, active })
+      return ok(subscription)
+    } catch (error) {
+      return serverError()
+    }
+  }
 }

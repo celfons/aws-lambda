@@ -29,7 +29,8 @@ const makeAddSubscription = (): ISubscription => {
         startDate: '2021-05-02',
         duration: 30,
         period: 'DAYS',
-        dueDate: '2021-06-02'
+        dueDate: '2021-06-02',
+        active: true
       }
       return await new Promise(resolve => resolve(fakeSubscription))
     }
@@ -42,8 +43,23 @@ const makeAddSubscription = (): ISubscription => {
         startDate: '2021-05-02',
         duration: 30,
         period: 'DAYS',
-        dueDate: '2021-06-02'
+        dueDate: '2021-06-02',
+        active: true
       }]
+      return await new Promise(resolve => resolve(fakeSubscription))
+    }
+
+    async update (subscription: SubscriptionModel): Promise<SubscriptionModel> {
+      const fakeSubscription = {
+        id: '1',
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS',
+        dueDate: '2021-06-02',
+        active: false
+      }
       return await new Promise(resolve => resolve(fakeSubscription))
     }
 
@@ -55,7 +71,8 @@ const makeAddSubscription = (): ISubscription => {
         startDate: '2021-05-02',
         duration: 30,
         period: 'DAYS',
-        dueDate: '2021-06-02'
+        dueDate: '2021-06-02',
+        active: true
       }]
       return await new Promise(resolve => resolve(fakeSubscription))
     }
@@ -232,7 +249,8 @@ describe('Subscription Controller', () => {
       startDate: '2021-05-02',
       duration: 30,
       period: 'DAYS',
-      dueDate: '2021-06-02'
+      dueDate: '2021-06-02',
+      active: true
     })
   })
   test('Should return 500 if get a subscriptions', async () => {
@@ -256,8 +274,57 @@ describe('Subscription Controller', () => {
         startDate: '2021-05-02',
         duration: 30,
         period: 'DAYS',
-        dueDate: '2021-06-02'
+        dueDate: '2021-06-02',
+        active: true
       }
     ])
+  })
+  test('Should return 500 if update a subscriptions', async () => {
+    const { sut, subscriptionStub } = makeSut()
+    const httpRequest = {
+      body: {
+        id: '1',
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS',
+        active: false
+      }
+    }
+    jest.spyOn(subscriptionStub, 'update').mockImplementationOnce(async () => {
+      return await new Promise((resolve, reject) => reject(new ServerError()))
+    })
+    const httpResponse = await sut.update(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
+  })
+  test('Should return 200 if update a subscriptions', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      body: {
+        id: '1',
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS',
+        active: false
+      }
+    }
+    const httpResponse = await sut.update(httpRequest)
+    expect(httpResponse.statusCode).toBe(200)
+    expect(httpResponse.body).toEqual(
+      {
+        id: '1',
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS',
+        dueDate: '2021-06-02',
+        active: false
+      }
+    )
   })
 })

@@ -20,4 +20,12 @@ subscriptionRouter.get('/subscriptions', (req, res) => {
   })
 })
 
+subscriptionRouter.put('/subscriptions', (req, res) => {
+  subscriptionController.update(req).then(function (data) {
+    return res.send(data)
+  }).catch(function (error) {
+    return res.json(error)
+  })
+})
+
 export default subscriptionRouter

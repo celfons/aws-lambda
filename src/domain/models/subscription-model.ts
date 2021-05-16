@@ -6,6 +6,7 @@ export interface SubscriptionModel {
   duration: number
   period: string
   dueDate: string
+  active: boolean
 }
 
 export interface AddSubscriptionModel {

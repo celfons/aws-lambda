@@ -14,26 +14,20 @@ export class SubscriptionService implements ISubscription {
   async create (subscription: AddSubscriptionModel): Promise<SubscriptionModel> {
     const id = uuidv4()
     const { customerId, offerId, startDate, duration, period } = subscription
-    const dueDate = this.buildDueDate(startDate, duration, period)
-    return await this.repository.create({ id, customerId, offerId, startDate, duration, period, dueDate })
+    const dueDate = DateHelpper.buildDueDate(startDate, duration, period)
+    const active = true
+    return await this.repository.create({ id, customerId, offerId, startDate, duration, period, dueDate, active })
   }
 
   async get (): Promise<SubscriptionModel[]> {
     return await this.repository.get()
   }
 
-  async getSubscriptionByDueDate (dueDate: string): Promise<SubscriptionModel[]> {
-    return await this.repository.getSubscriptionByDueDate(dueDate)
+  async update (subscription: SubscriptionModel): Promise<SubscriptionModel> {
+    return await this.repository.update(subscription)
   }
 
-  buildDueDate (date: string, duration: number, period: string): string {
-    const buildDate = new Date(date)
-    if (period === 'DAYS') {
-      const dueDate = buildDate.setDate(buildDate.getDate() + duration)
-      return DateHelpper.format(new Date(dueDate))
-    } else {
-      const dueDate = buildDate.setMonth(buildDate.getMonth() + duration)
-      return DateHelpper.format(new Date(dueDate))
-    }
+  async getSubscriptionByDueDate (dueDate: string): Promise<SubscriptionModel[]> {
+    return await this.repository.getSubscriptionByDueDate(dueDate)
   }
 }

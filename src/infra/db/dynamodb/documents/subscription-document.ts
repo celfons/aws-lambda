@@ -9,7 +9,8 @@ export class SubscriptionDocument implements SubscriptionModel {
     startDate: string,
     duration: number,
     period: string,
-    dueDate: string
+    dueDate: string,
+    active: boolean
   ) {
     this.id = id
     this.customerId = customerId
@@ -18,6 +19,7 @@ export class SubscriptionDocument implements SubscriptionModel {
     this.duration = duration
     this.period = period
     this.dueDate = dueDate
+    this.active = active
   }
 
   id: string
@@ -27,18 +29,20 @@ export class SubscriptionDocument implements SubscriptionModel {
   duration: number
   period: string
   dueDate: string
+  active: boolean
 }
 
 export const SubscriptionSchema = {
   getSchema (): Schema {
     return new Schema({
-      id: String,
+      id: { type: String, hashKey: true },
       customerId: String,
       offerId: String,
       startDate: String,
       duration: Number,
       period: String,
-      dueDate: String
+      dueDate: String,
+      active: Boolean
     })
   }
 }
