@@ -1,5 +1,6 @@
 import { IQueue } from '../../domain/queue'
 import { ISubscription } from '../../domain/subscription'
+import { DateHelpper } from '../../utils/date-helpper'
 
 export class SubscriptionJob {
   private readonly queue: IQueue
@@ -11,7 +12,8 @@ export class SubscriptionJob {
   }
 
   async run (): Promise<void> {
-    const message = await this.service.get()
-    await this.queue.send(message)
+    const dueDate = DateHelpper.format(new Date())
+    const message = await this.service.getSubscriptionByDueDate(dueDate)
+    await this.queue.send(message, 'recurrent-billing')
   }
 }

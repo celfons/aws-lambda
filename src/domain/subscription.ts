@@ -1,6 +1,7 @@
-import { SubscriptionModel } from './models/subscription-model'
+import { AddSubscriptionModel, SubscriptionModel } from './models/subscription-model'
 
 export interface ISubscription {
-  create: (subscription: SubscriptionModel) => Promise<SubscriptionModel>
+  create: (subscription: AddSubscriptionModel) => Promise<SubscriptionModel>
   get: () => Promise<SubscriptionModel[]>
+  getSubscriptionByDueDate: (dueDate: string) => Promise<SubscriptionModel[]>
 }

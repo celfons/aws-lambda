@@ -1,8 +1,17 @@
 export interface SubscriptionModel {
-  id?: string
+  id: string
   customerId: string
   offerId: string
   startDate: string
-  duration: string
+  duration: number
+  period: string
+  dueDate: string
+}
+
+export interface AddSubscriptionModel {
+  customerId: string
+  offerId: string
+  startDate: string
+  duration: number
   period: string
 }

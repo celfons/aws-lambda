@@ -4,4 +4,7 @@ import app from './config/express'
 
 module.exports.api = serverless(app)
 
-module.exports.run = makeSubscriptionJob().run()
+module.exports.run = async () => {
+  const job = makeSubscriptionJob()
+  await job.run()
+}

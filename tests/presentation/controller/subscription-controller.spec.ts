@@ -1,24 +1,35 @@
 import { SubscriptionController } from '@/presentation/controller/subscription-controller'
-import { MissingParamError } from '@/presentation/errors/missing-param-error'
-import { ServerError } from '@/presentation/errors/server-error'
+import { ServerError, InvalidParamError, MissingParamError } from '@/presentation/errors'
 import { ISubscription } from '@/domain/subscription'
-import { SubscriptionModel } from '@/domain/models/subscription-model'
+import { AddSubscriptionModel, SubscriptionModel } from '@/domain/models/subscription-model'
+import { IDateValidator } from '@/presentation/controller/helpers/date-validator'
 
 interface SutTypes {
   sut: SubscriptionController
+  dateValidatorStub: IDateValidator
   subscriptionStub: ISubscription
+}
+
+const makeDateValidator = (): IDateValidator => {
+  class DateValidatorStub implements IDateValidator {
+    isValid (date: string): boolean {
+      return true
+    }
+  }
+  return new DateValidatorStub()
 }
 
 const makeAddSubscription = (): ISubscription => {
   class SubscriptionStub implements ISubscription {
-    async create (subscription: SubscriptionModel): Promise<SubscriptionModel> {
+    async create (subscription: AddSubscriptionModel): Promise<SubscriptionModel> {
       const fakeSubscription = {
         id: '1',
         customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         startDate: '2021-05-02',
-        duration: '30',
-        period: 'DAYS'
+        duration: 30,
+        period: 'DAYS',
+        dueDate: '2021-06-02'
       }
       return await new Promise(resolve => resolve(fakeSubscription))
     }
@@ -29,8 +40,22 @@ const makeAddSubscription = (): ISubscription => {
         customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         startDate: '2021-05-02',
-        duration: '30',
-        period: 'DAYS'
+        duration: 30,
+        period: 'DAYS',
+        dueDate: '2021-06-02'
+      }]
+      return await new Promise(resolve => resolve(fakeSubscription))
+    }
+
+    async getSubscriptionByDueDate (): Promise<SubscriptionModel[]> {
+      const fakeSubscription = [{
+        id: '1',
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS',
+        dueDate: '2021-06-02'
       }]
       return await new Promise(resolve => resolve(fakeSubscription))
     }
@@ -40,9 +65,11 @@ const makeAddSubscription = (): ISubscription => {
 
 const makeSut = (): SutTypes => {
   const subscriptionStub = makeAddSubscription()
-  const sut = new SubscriptionController(subscriptionStub)
+  const dateValidatorStub = makeDateValidator()
+  const sut = new SubscriptionController(subscriptionStub, dateValidatorStub)
   return {
     sut,
+    dateValidatorStub,
     subscriptionStub
   }
 }
@@ -54,7 +81,7 @@ describe('Subscription Controller', () => {
       body: {
         offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         startDate: '2021-05-02',
-        duration: '30',
+        duration: 30,
         period: 'DAYS'
       }
     }
@@ -68,7 +95,7 @@ describe('Subscription Controller', () => {
       body: {
         customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         startDate: '2021-05-02',
-        duration: '30',
+        duration: 30,
         period: 'DAYS'
       }
     }
@@ -82,7 +109,7 @@ describe('Subscription Controller', () => {
       body: {
         customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
-        duration: '30',
+        duration: 30,
         period: 'DAYS'
       }
     }
@@ -111,12 +138,61 @@ describe('Subscription Controller', () => {
         customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         startDate: '2021-05-02',
-        duration: '30'
+        duration: 30
       }
     }
     const httpResponse = await sut.create(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body).toEqual(new MissingParamError('period'))
+  })
+  test('Should return 400 if an invalid startDate is provided', async () => {
+    const { sut, dateValidatorStub } = makeSut()
+    jest.spyOn(dateValidatorStub, 'isValid').mockReturnValueOnce(false)
+    const httpRequest = {
+      body: {
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS'
+      }
+    }
+    const httpResponse = await sut.create(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new InvalidParamError('startDate'))
+  })
+  test('Should call DateValidator with correct date', async () => {
+    const { sut, dateValidatorStub } = makeSut()
+    const isValidSpy = jest.spyOn(dateValidatorStub, 'isValid')
+    const httpRequest = {
+      body: {
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS'
+      }
+    }
+    await sut.create(httpRequest)
+    expect(isValidSpy).toHaveBeenCalledWith('2021-05-02')
+  })
+  test('Should return 500 if DateValidator throws', async () => {
+    const { sut, dateValidatorStub } = makeSut()
+    jest.spyOn(dateValidatorStub, 'isValid').mockImplementationOnce(() => {
+      throw new Error()
+    })
+    const httpRequest = {
+      body: {
+        customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
+        startDate: '2021-05-02',
+        duration: 30,
+        period: 'DAYS'
+      }
+    }
+    const httpResponse = await sut.create(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
   })
   test('Should return 500 if AddSubscription throws', async () => {
     const { sut, subscriptionStub } = makeSut()
@@ -128,7 +204,7 @@ describe('Subscription Controller', () => {
         customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         startDate: '2021-05-02',
-        duration: '30',
+        duration: 30,
         period: 'DAYS'
       }
     }
@@ -143,7 +219,7 @@ describe('Subscription Controller', () => {
         customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         startDate: '2021-05-02',
-        duration: '30',
+        duration: 30,
         period: 'DAYS'
       }
     }
@@ -154,18 +230,10 @@ describe('Subscription Controller', () => {
       customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
       offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
       startDate: '2021-05-02',
-      duration: '30',
-      period: 'DAYS'
+      duration: 30,
+      period: 'DAYS',
+      dueDate: '2021-06-02'
     })
-  })
-  test('Should return 404 if get a subscriptions', async () => {
-    const { sut, subscriptionStub } = makeSut()
-    jest.spyOn(subscriptionStub, 'get').mockImplementationOnce(async () => {
-      return await new Promise((resolve, reject) => resolve([]))
-    })
-    const httpResponse = await sut.get()
-    expect(httpResponse.statusCode).toBe(404)
-    expect(httpResponse.body).toEqual(new MissingParamError('Subscriptions not found'))
   })
   test('Should return 500 if get a subscriptions', async () => {
     const { sut, subscriptionStub } = makeSut()
@@ -186,8 +254,9 @@ describe('Subscription Controller', () => {
         customerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         offerId: '0fa109e0-0ff1-4ff2-b28e-2bb1a18b15ba',
         startDate: '2021-05-02',
-        duration: '30',
-        period: 'DAYS'
+        duration: 30,
+        period: 'DAYS',
+        dueDate: '2021-06-02'
       }
     ])
   })

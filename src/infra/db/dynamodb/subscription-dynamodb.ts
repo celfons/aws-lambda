@@ -3,7 +3,6 @@ import { DynamoHelper } from './helpper'
 import { ISubscriptionRepository } from '../../../data/repository/subscription-repository'
 import { SubscriptionDocument, SubscriptionSchema } from '../dynamodb/documents/subscription-document'
 import { SubscriptionModel } from '../../../domain/models/subscription-model'
-import { v4 as uuidv4 } from 'uuid'
 
 export class SubscriptionRepository implements ISubscriptionRepository {
   async create (subscription: SubscriptionModel): Promise<SubscriptionModel> {
@@ -11,12 +10,13 @@ export class SubscriptionRepository implements ISubscriptionRepository {
       await DynamoHelper.connect()
       const Model = dynamoose.model('Subscriptions', SubscriptionSchema.getSchema())
       const document = new SubscriptionDocument(
-        uuidv4(),
+        subscription.id,
         subscription.customerId,
         subscription.offerId,
         subscription.startDate,
         subscription.duration,
-        subscription.period
+        subscription.period,
+        subscription.dueDate
       )
       const model = new Model(document)
       await model.save()
@@ -27,15 +27,36 @@ export class SubscriptionRepository implements ISubscriptionRepository {
   }
 
   async get (): Promise<SubscriptionModel[]> {
-    await DynamoHelper.connect()
-    const Model = dynamoose.model('Subscriptions', SubscriptionSchema.getSchema())
-    const subscriptions = await Model.scan().exec()
-    const result: SubscriptionModel[] = []
-    if (subscriptions.count !== 0) {
-      subscriptions.forEach((item, index, arr) => {
-        result.push(arr[index] as Object as SubscriptionDocument)
-      })
+    try {
+      await DynamoHelper.connect()
+      const Model = dynamoose.model('Subscriptions', SubscriptionSchema.getSchema())
+      const subscriptions = await Model.scan().exec()
+      const result: SubscriptionModel[] = []
+      if (subscriptions.count !== 0) {
+        subscriptions.forEach((item, index, arr) => {
+          result.push(arr[index] as Object as SubscriptionDocument)
+        })
+      }
+      return new Promise(resolve => resolve(result))
+    } catch (error) {
+      return error
     }
-    return new Promise(resolve => resolve(result))
+  }
+
+  async getSubscriptionByDueDate (dueDate: string): Promise<SubscriptionModel[]> {
+    try {
+      await DynamoHelper.connect()
+      const Model = dynamoose.model('Subscriptions', SubscriptionSchema.getSchema())
+      const subscriptions = await Model.query('dueDate').eq(dueDate).exec()
+      const result: SubscriptionModel[] = []
+      if (subscriptions.count !== 0) {
+        subscriptions.forEach((item, index, arr) => {
+          result.push(arr[index] as Object as SubscriptionDocument)
+        })
+      }
+      return new Promise(resolve => resolve(result))
+    } catch (error) {
+      return error
+    }
   }
 }

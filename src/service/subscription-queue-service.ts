@@ -8,7 +8,7 @@ export class SubscriptionQueueService implements IQueue {
     this.queue = queue
   }
 
-  async send (message: any): Promise<void> {
-    return await this.queue.send(message)
+  async send (message: any, topic: string): Promise<void> {
+    return await this.queue.send(message, topic)
   }
 }

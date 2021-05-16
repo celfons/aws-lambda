@@ -1,15 +1,16 @@
-import { HttpResponse, HttpRequest } from './helpers/http'
-import { badRequest, serverError, ok, notFound } from './helpers/ http-helper'
+import { HttpResponse, HttpRequest, badRequest, serverError, ok, verifyParam } from './helpers'
 import { ISubscription } from '../../domain/subscription'
 import { Controller } from './controller'
-import { verifyParam } from './helpers/validate-helper'
-import { MissingParamError } from '../errors/missing-param-error'
+import { MissingParamError, InvalidParamError } from '../errors'
+import { IDateValidator } from './helpers/date-validator'
 
 export class SubscriptionController implements Controller {
   private readonly service: ISubscription
+  private readonly dateValidator: IDateValidator
 
-  constructor (service: ISubscription) {
+  constructor (service: ISubscription, dateValidator: IDateValidator) {
     this.service = service
+    this.dateValidator = dateValidator
   }
 
   async create (httpRequest: HttpRequest): Promise<HttpResponse> {
@@ -20,6 +21,10 @@ export class SubscriptionController implements Controller {
         return badRequest(new MissingParamError(invalidParam))
       }
       const { customerId, offerId, startDate, duration, period } = httpRequest.body
+      const isValid = this.dateValidator.isValid(httpRequest.body.startDate)
+      if (!isValid) {
+        return badRequest(new InvalidParamError('startDate'))
+      }
       const subscription = await this.service.create({
         customerId,
         offerId,
@@ -36,9 +41,6 @@ export class SubscriptionController implements Controller {
   async get (): Promise<HttpResponse> {
     try {
       const subscription = await this.service.get()
-      if (subscription.length === 0) {
-        return notFound(new MissingParamError('Subscriptions not found'))
-      }
       return ok(subscription)
     } catch (error) {
       return serverError()

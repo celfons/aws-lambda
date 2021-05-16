@@ -3,7 +3,7 @@ import * as kafkajs from 'kafkajs'
 import { ISubscriptionQueue } from '../../data/queue/subscription-queue'
 
 export class SubscriptionKafkaQueue implements ISubscriptionQueue {
-  async send (message): Promise<void> {
+  async send (message, topic: string): Promise<void> {
     const kafka = new kafkajs.Kafka({
       clientId: config.get('CLIENT_ID'),
       brokers: [config.get('BROKERS')]
@@ -12,7 +12,7 @@ export class SubscriptionKafkaQueue implements ISubscriptionQueue {
     const value = JSON.stringify(message)
     await producer.connect()
     await producer.send({
-      topic: config.get('TOPIC'),
+      topic: topic,
       messages: [
         { value: value }
       ]

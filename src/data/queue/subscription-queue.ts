@@ -1,3 +1,3 @@
 export interface ISubscriptionQueue {
-  send: (message: any) => Promise<void>
+  send: (message: any, topic: string) => Promise<void>
 }
