@@ -11,6 +11,10 @@ KAFKA
 DYNAMODB
 ```
 
+### Diagram:
+
+![image](https://user-images.githubusercontent.com/7029523/118404289-b7a6e200-b648-11eb-94a0-b45d4b779064.png)
+
 ### Steps:
 
 Clone this repository
